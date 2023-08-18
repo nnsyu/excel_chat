@@ -15,6 +15,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Padding(
@@ -254,36 +255,46 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           const SizedBox(
-            height: 10,
+            height: 5,
           ),
-          Row(
-            children: [
-              Image.asset(
-                'assets/images/topleft.png',
-              ),
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 5),
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 1, color: Colors.grey.shade400),
-                  ),
-                  child: TextField(
-                    textAlign: TextAlign.start,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(5),
-                      border: InputBorder.none,
-                      hintText: '내용을 입력하세요',
-                      suffix: Icon(
-                        Icons.arrow_forward,
-                        size: 18,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Row(
+              children: [
+                Image.asset(
+                  'assets/images/topleft.png',
+                ),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 1, color: Colors.grey.shade400),
+                    ),
+                    child: TextField(
+                      onTap: (){
+
+                      },
+                      textAlign: TextAlign.start,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 5.3, horizontal: 5.0),
+                        border: InputBorder.none,
+                        hintText: '내용을 입력하세요',
+                        suffix: Icon(
+                          Icons.arrow_forward,
+                          size: 18,
+                        ),
+                        isDense: true,
+                      ),
+                      cursorColor: Colors.black.withOpacity(0.8),
+                      autofocus: true,
+                      style: TextStyle(
+                        fontSize: 15
                       ),
                     ),
-                    cursorColor: Colors.black.withOpacity(0.8),
-                    autofocus: true,
                   ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
           Expanded(
             child: Container(),

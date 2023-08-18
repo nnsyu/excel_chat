@@ -8,8 +8,6 @@ class JoinScreen extends StatefulWidget {
 }
 
 class _JoinScreenState extends State<JoinScreen> {
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,29 +20,82 @@ class _JoinScreenState extends State<JoinScreen> {
                 alignment: Alignment.centerLeft,
                 color: const Color(0xFF217346),
                 child: Padding(
-                  padding: const EdgeInsets.all(15.0),
+                  padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 25.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MenuText(
-                        icon: Icons.access_time,
-                        name: '메뉴1',
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.0),
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.all(10.0),
+                              child: Icon(
+                                Icons.arrow_back,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       SizedBox(
-                        height: 10,
+                        height: 30,
                       ),
-                      MenuText(
-                        icon: Icons.ac_unit_rounded,
-                        name: '메뉴2',
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          "방 만들기",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w100,
+                          ),
+                        ),
                       ),
+                      // MenuText(
+                      //   icon: Icons.add_comment_outlined,
+                      //   name: '방 만들기',
+                      // ),
                       SizedBox(
-                        height: 10,
+                        height: 15,
                       ),
-                      MenuText(
-                        icon: Icons.class_sharp,
-                        name: '메뉴3',
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          "방 참여하기",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w100,
+                          ),
+                        ),
                       ),
-                      SizedBox(
-                        height: 10,
+
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Divider(
+                          color: Colors.white,
+                          thickness: 0.25,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          "방 나가기",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w100,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -81,21 +132,22 @@ class MenuText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(
           icon,
           color: Colors.white,
-          size: 15,
+          size: 18,
         ),
         SizedBox(
-          width: 5,
+          width: 8,
         ),
         Text(
           '$name',
           textAlign: TextAlign.start,
           style: TextStyle(
             color: Colors.white,
-            fontSize: 15,
+            fontSize: 18,
           ),
         ),
       ],
