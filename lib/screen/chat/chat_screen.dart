@@ -1,3 +1,5 @@
+import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
+import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -288,7 +290,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       cursorColor: Colors.black.withOpacity(0.8),
                       autofocus: true,
                       style: TextStyle(
-                        fontSize: 15
+                        fontSize: 13
                       ),
                     ),
                   ),
@@ -297,7 +299,59 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Expanded(
-            child: Container(),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: CustomPaint(
+                painter: GridBackgroundPainter(),
+                child: Container(),
+              ),
+            ),
+          ),
+          Container(
+            height: 30,
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              border: Border(
+                top: BorderSide(
+                  width: 1,
+                  color: Colors.grey.shade400,
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Icon(
+                    Icons.arrow_left,
+                    color: Colors.grey[400],
+                    size: 18,
+                  ),
+                  Icon(
+                    Icons.arrow_right,
+                    color: Colors.grey[400],
+                    size: 18,
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: Container(
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 3,
+                        itemBuilder: (context, i) {
+                          return ChatSheet(name: "채팅방");
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           Row(
             children: [
