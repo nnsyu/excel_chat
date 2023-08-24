@@ -1,8 +1,11 @@
 import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
 import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
+import 'package:excel_chat/screen/chat/components/grid_painter.dart';
+import 'package:excel_chat/screen/chat/components/message_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -12,7 +15,30 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  late TextEditingController _messageController;
+  late ScrollController _scrollController;
+  late FocusNode _focusNode;
+
   String title = '엑셀제목제목';
+
+  List<MessageWidget> messageList = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    _messageController = TextEditingController();
+    _scrollController = ScrollController();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,17 +299,21 @@ class _ChatScreenState extends State<ChatScreen> {
                       border: Border.all(width: 1, color: Colors.grey.shade400),
                     ),
                     child: TextField(
-                      onTap: (){
-
-                      },
+                      onSubmitted: submitMessage,
+                      focusNode: _focusNode,
+                      controller: _messageController,
                       textAlign: TextAlign.start,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(vertical: 5.3, horizontal: 5.0),
                         border: InputBorder.none,
                         hintText: '내용을 입력하세요',
-                        suffix: Icon(
-                          Icons.arrow_forward,
-                          size: 18,
+                        suffix: GestureDetector(
+                          onTap: sendMessage,
+                          child: Icon(
+                            Icons.arrow_forward,
+                            color: Colors.grey.shade400,
+                            size: 18,
+                          ),
                         ),
                         isDense: true,
                       ),
@@ -303,7 +333,14 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: const EdgeInsets.only(top: 5),
               child: CustomPaint(
                 painter: GridBackgroundPainter(),
-                child: Container(),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messageList.length,
+                    itemBuilder: (context, index) => messageList[index],
+                  ),
+                ),
               ),
             ),
           ),
@@ -338,13 +375,14 @@ class _ChatScreenState extends State<ChatScreen> {
                   SizedBox(
                     width: 20,
                   ),
+                  ChatSheet(name: "Sheet1"),
                   Expanded(
                     child: Container(
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: 3,
+                        itemCount: 1,
                         itemBuilder: (context, i) {
-                          return ChatSheet(name: "채팅방");
+                          return ChatSheet(name: "채팅1");
                         },
                       ),
                     ),
@@ -379,5 +417,46 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  void scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void submitMessage(String text) {
+    if(text.isNotEmpty) {
+      DateTime currentTime = DateTime.now()..toLocal();
+      var formatter = DateFormat('MM-dd HH:mm', 'ko_KR');
+      String strDate = formatter.format(currentTime);
+
+      var message = MessageWidget(nick: '에우', date: strDate, message: text, mine: true,);
+      setState(() {
+        messageList.add(message);
+        _messageController.clear();
+        FocusScope.of(context).requestFocus(_focusNode);
+        scrollToBottom();
+      });
+    }
+  }
+
+  void sendMessage() {
+    var strMessage = _messageController.text;
+    if(strMessage.isNotEmpty) {
+      DateTime currentTime = DateTime.now();
+      var formatter = DateFormat('MM-dd HH:mm', 'ko_KR');
+      String strDate = formatter.format(currentTime);
+
+      var message = MessageWidget(nick: '에우', date: strDate, message: _messageController.text, mine: true,);
+      setState(() {
+        messageList.add(message);
+        _messageController.clear();
+        FocusScope.of(context).requestFocus(_focusNode);
+        scrollToBottom();
+      });
+    }
   }
 }

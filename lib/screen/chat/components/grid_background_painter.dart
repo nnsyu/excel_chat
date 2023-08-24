@@ -9,7 +9,7 @@ class GridBackgroundPainter extends CustomPainter {
       ..strokeWidth = 1.0;
 
     // 가로 선 그리기
-    for (int i = 0; i <= size.height.toInt(); i += 20) {
+    for (int i = 0; i <= size.height.toInt(); i += 24) {
       canvas.drawLine(Offset(0, i.toDouble()), Offset(size.width, i.toDouble()), paintStyle);
     }
 
