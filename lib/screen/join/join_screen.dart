@@ -8,13 +8,19 @@ class JoinScreen extends StatefulWidget {
 }
 
 class _JoinScreenState extends State<JoinScreen> {
-
   late TextEditingController _inputController;
+
+  final TAP_JOIN = 0;
+  final TAP_CREATE = 1;
+  final TAP_HELP = 2;
+
+  int _selectTap = 0;
 
   @override
   void initState() {
     super.initState();
     _inputController = TextEditingController();
+    _selectTap = TAP_JOIN;
   }
 
   @override
@@ -34,7 +40,8 @@ class _JoinScreenState extends State<JoinScreen> {
               alignment: Alignment.centerLeft,
               color: const Color(0xFF217346),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 25.0),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 18.0, horizontal: 25.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -64,7 +71,11 @@ class _JoinScreenState extends State<JoinScreen> {
                       height: 30,
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          _selectTap = TAP_CREATE;
+                        });
+                      },
                       child: const Text(
                         "방 만들기",
                         style: TextStyle(
@@ -82,9 +93,32 @@ class _JoinScreenState extends State<JoinScreen> {
                       height: 15,
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          _selectTap = TAP_JOIN;
+                        });
+                      },
                       child: const Text(
                         "방 참여하기",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w100,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectTap = TAP_HELP;
+                        });
+                      },
+                      child: const Text(
+                        "도움말",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -131,7 +165,8 @@ class _JoinScreenState extends State<JoinScreen> {
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 8),
                       child: TextField(
                         style: TextStyle(
                           fontSize: 15,
