@@ -1,3 +1,6 @@
+import 'package:excel_chat/screen/join/create_tap.dart';
+import 'package:excel_chat/screen/join/help_tap.dart';
+import 'package:excel_chat/screen/join/join_tap.dart';
 import 'package:flutter/material.dart';
 
 class JoinScreen extends StatefulWidget {
@@ -8,7 +11,6 @@ class JoinScreen extends StatefulWidget {
 }
 
 class _JoinScreenState extends State<JoinScreen> {
-  late TextEditingController _inputController;
 
   final TAP_JOIN = 0;
   final TAP_CREATE = 1;
@@ -19,13 +21,11 @@ class _JoinScreenState extends State<JoinScreen> {
   @override
   void initState() {
     super.initState();
-    _inputController = TextEditingController();
     _selectTap = TAP_JOIN;
   }
 
   @override
   void dispose() {
-    _inputController.dispose();
     super.dispose();
   }
 
@@ -47,21 +47,24 @@ class _JoinScreenState extends State<JoinScreen> {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1.0),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(10.0),
-                            child: Icon(
-                              Icons.arrow_back,
-                              size: 18,
-                              color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 5.0),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(10.0),
+                              child: Icon(
+                                Icons.arrow_back,
+                                size: 25,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -73,14 +76,15 @@ class _JoinScreenState extends State<JoinScreen> {
                     TextButton(
                       onPressed: () {
                         setState(() {
-                          _selectTap = TAP_CREATE;
+                          _selectTap = TAP_JOIN;
                         });
                       },
                       child: const Text(
-                        "방 만들기",
+                        "방 참여하기",
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w100,
                         ),
                       ),
@@ -95,19 +99,19 @@ class _JoinScreenState extends State<JoinScreen> {
                     TextButton(
                       onPressed: () {
                         setState(() {
-                          _selectTap = TAP_JOIN;
+                          _selectTap = TAP_CREATE;
                         });
                       },
                       child: const Text(
-                        "방 참여하기",
+                        "방 만들기",
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w100,
                         ),
                       ),
                     ),
-
                     const SizedBox(
                       height: 15,
                     ),
@@ -119,9 +123,10 @@ class _JoinScreenState extends State<JoinScreen> {
                       },
                       child: const Text(
                         "도움말",
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w100,
                         ),
                       ),
@@ -138,9 +143,10 @@ class _JoinScreenState extends State<JoinScreen> {
                       onPressed: () {},
                       child: const Text(
                         "방 나가기",
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w100,
                         ),
                       ),
@@ -154,53 +160,22 @@ class _JoinScreenState extends State<JoinScreen> {
             flex: 6,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 25),
-              child: Column(
-                children: [
-                  Container(
-                    width: 300,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 0.8,
-                        color: Colors.black.withOpacity(0.4),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 8),
-                      child: TextField(
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black.withOpacity(0.4),
-                        ),
-                        controller: _inputController,
-                        textAlign: TextAlign.start,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(0),
-                          border: InputBorder.none,
-                          hintText: '닉네임을 입력하세요',
-                          suffix: GestureDetector(
-                            child: Icon(
-                              Icons.arrow_forward,
-                              color: Colors.grey.shade200,
-                              size: 18,
-                            ),
-                          ),
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Expanded(
-                  //   child: Container(),
-                  // ),
-                ],
-              ),
+              child: selectTap(),
             ),
           )
         ],
       ),
     );
+  }
+
+  Widget selectTap() {
+    if(_selectTap == TAP_JOIN) {
+      return JoinTap();
+    } else if (_selectTap == TAP_CREATE) {
+      return CreateTap();
+    } else {
+      return HelpTap();
+    }
   }
 }
 
