@@ -15,7 +15,6 @@ class _JoinTapState extends State<JoinTap> {
   void joinRoom(String nick, String code) {
     print('닉네임 : $nick, 방코드 : $code');
     //todo : 방 코드에 해당하는 방이 있는지 체크
-
   }
 
   @override
@@ -128,9 +127,14 @@ class _JoinTapState extends State<JoinTap> {
               color: Colors.grey[500],
             ),
           ),
-          SizedBox(height: 30,),
+          SizedBox(
+            height: 30,
+          ),
           GestureDetector(
-            onTap: () => joinRoom(_inputNickController.text, _inputCodeController.text),
+            onTap: () => joinRoom(
+              _inputNickController.text,
+              _inputCodeController.text,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
