@@ -3,14 +3,14 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class CreateTap extends StatefulWidget {
-  const CreateTap({super.key});
+class CreateTab extends StatefulWidget {
+  const CreateTab({super.key});
 
   @override
-  State<CreateTap> createState() => _CreateTapState();
+  State<CreateTab> createState() => _CreateTabState();
 }
 
-class _CreateTapState extends State<CreateTap> {
+class _CreateTabState extends State<CreateTab> {
   late TextEditingController _inputNickController;
   late TextEditingController _inputNameController;
 
@@ -148,23 +148,9 @@ class _CreateTapState extends State<CreateTap> {
           ),
           child: Container(
             decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  width: 1,
-                  color: Colors.grey.shade400,
-                ),
-                left: BorderSide(
-                  width: 1,
-                  color: Colors.grey.shade400,
-                ),
-                right: BorderSide(
-                  width: 1,
-                  color: Colors.grey.shade400,
-                ),
-                bottom: BorderSide(
-                  width: 1,
-                  color: Colors.grey.shade400,
-                ),
+              border: Border.all(
+                width: 1,
+                color: Colors.grey.shade400,
               ),
             ),
             child: Padding(

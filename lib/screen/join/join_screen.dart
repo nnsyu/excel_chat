@@ -1,6 +1,7 @@
-import 'package:excel_chat/screen/join/create_tap.dart';
-import 'package:excel_chat/screen/join/help_tap.dart';
-import 'package:excel_chat/screen/join/join_tap.dart';
+import 'package:excel_chat/screen/join/tab/create_tab.dart';
+import 'package:excel_chat/screen/join/tab/help_tab.dart';
+import 'package:excel_chat/screen/join/tab/join_tab.dart';
+import 'package:excel_chat/screen/join/tab/setting_tab.dart';
 import 'package:flutter/material.dart';
 
 class JoinScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _JoinScreenState extends State<JoinScreen> {
   final TAP_JOIN = 0;
   final TAP_CREATE = 1;
   final TAP_HELP = 2;
+  final TAP_SETTING = 3;
 
   int _selectTap = 0;
 
@@ -116,13 +118,9 @@ class _JoinScreenState extends State<JoinScreen> {
                       height: 15,
                     ),
                     TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectTap = TAP_HELP;
-                        });
-                      },
+                      onPressed: () {},
                       child: const Text(
-                        "도움말",
+                        "방 나가기",
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           color: Colors.white,
@@ -131,7 +129,6 @@ class _JoinScreenState extends State<JoinScreen> {
                         ),
                       ),
                     ),
-
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 20),
                       child: Divider(
@@ -140,9 +137,32 @@ class _JoinScreenState extends State<JoinScreen> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          _selectTap = TAP_SETTING;
+                        });
+                      },
                       child: const Text(
-                        "방 나가기",
+                        "설정   ",
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w100,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectTap = TAP_HELP;
+                        });
+                      },
+                      child: const Text(
+                        "도움말",
                         textAlign: TextAlign.start,
                         style: TextStyle(
                           color: Colors.white,
@@ -170,11 +190,13 @@ class _JoinScreenState extends State<JoinScreen> {
 
   Widget selectTap() {
     if(_selectTap == TAP_JOIN) {
-      return JoinTap();
+      return JoinTab();
     } else if (_selectTap == TAP_CREATE) {
-      return CreateTap();
+      return CreateTab();
+    } else if (_selectTap == TAP_SETTING){
+      return SettingTab();
     } else {
-      return HelpTap();
+      return HelpTab();
     }
   }
 }

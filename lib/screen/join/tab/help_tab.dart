@@ -2,8 +2,8 @@ import 'package:excel_chat/screen/join/components/info_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class HelpTap extends StatelessWidget {
-  const HelpTap({super.key});
+class HelpTab extends StatelessWidget {
+  const HelpTab({super.key});
 
   @override
   Widget build(BuildContext context) {

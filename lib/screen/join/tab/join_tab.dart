@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class JoinTap extends StatefulWidget {
-  const JoinTap({super.key});
+class JoinTab extends StatefulWidget {
+  const JoinTab({super.key});
 
   @override
-  State<JoinTap> createState() => _JoinTapState();
+  State<JoinTab> createState() => _JoinTabState();
 }
 
-class _JoinTapState extends State<JoinTap> {
+class _JoinTabState extends State<JoinTab> {
   late TextEditingController _inputNickController;
   late TextEditingController _inputCodeController;
 
@@ -137,23 +137,9 @@ class _JoinTapState extends State<JoinTap> {
             ),
             child: Container(
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    width: 1,
-                    color: Colors.grey.shade400,
-                  ),
-                  left: BorderSide(
-                    width: 1,
-                    color: Colors.grey.shade400,
-                  ),
-                  right: BorderSide(
-                    width: 1,
-                    color: Colors.grey.shade400,
-                  ),
-                  bottom: BorderSide(
-                    width: 1,
-                    color: Colors.grey.shade400,
-                  ),
+                border: Border.all(
+                  width: 1,
+                  color: Colors.grey.shade400,
                 ),
               ),
               child: Padding(
