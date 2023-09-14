@@ -1,3 +1,4 @@
+import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
 import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
 import 'package:excel_chat/screen/chat/components/grid_painter.dart';
@@ -5,16 +6,21 @@ import 'package:excel_chat/screen/chat/components/message_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class ChatScreen extends StatefulWidget {
+final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
+  return LockImageNotifier();
+});
+
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   late TextEditingController _messageController;
   late ScrollController _scrollController;
   late FocusNode _focusNode;
@@ -23,6 +29,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   List<MessageWidget> messageList = [];
 
+  int selectTapIndex = 0;
 
   @override
   void initState() {
@@ -42,6 +49,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final LockImage lockImage = ref.watch(lockImageProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -375,14 +384,14 @@ class _ChatScreenState extends State<ChatScreen> {
                   SizedBox(
                     width: 20,
                   ),
-                  ChatSheet(name: "Sheet1"),
+                  ChatSheet(name: "Sheet1", onPressed: (){},),
                   Expanded(
                     child: Container(
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: 1,
                         itemBuilder: (context, i) {
-                          return ChatSheet(name: "채팅1");
+                          return ChatSheet(name: "채팅1", onPressed: (){},);
                         },
                       ),
                     ),

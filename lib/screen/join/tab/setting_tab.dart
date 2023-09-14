@@ -1,15 +1,37 @@
-import 'package:flutter/material.dart';
+import 'dart:html' as html;
 
-class SettingTab extends StatefulWidget {
+import 'package:excel_chat/providers/lock_image_provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
+  return LockImageNotifier();
+});
+
+class SettingTab extends ConsumerStatefulWidget {
   const SettingTab({super.key});
 
+  // Future selectLockImage() async {
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+  //
+  //   if(result != null) {
+  //     final bytes = result.files.first.bytes;
+  //     final blob = html.Blob([bytes]);
+  //     final url = html.Url.createObjectUrlFromBlob(blob);
+  //
+  //   }
+  // }
+
   @override
-  State<SettingTab> createState() => _SettingTapState();
+  ConsumerState<SettingTab> createState() => _SettingTabState();
 }
 
-class _SettingTapState extends State<SettingTab> {
-  @override
+class _SettingTabState extends ConsumerState<SettingTab> {
+@override
   Widget build(BuildContext context) {
+
+
     return Container(
       height: double.infinity,
       child: SingleChildScrollView(
@@ -51,14 +73,26 @@ class _SettingTapState extends State<SettingTab> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(7),
-                    child: Text(''),
+                    child: Text(ref.read(lockImageProvider.notifier).getUrl(), style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                    ),),
                   ),
                 ),
                 SizedBox(
                   width: 10,
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+                    if(result != null) {
+                      final bytes = result.files.first.bytes;
+                      final blob = html.Blob([bytes]);
+                      final url = html.Url.createObjectUrlFromBlob(blob);
+
+                      ref.read(lockImageProvider.notifier).updateUrl(url);
+                    }
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
@@ -77,40 +111,6 @@ class _SettingTapState extends State<SettingTab> {
                     ),
                   ),
                 ),
-                // GestureDetector(
-                //   onTap: () {},
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       border: Border(
-                //         top: BorderSide(
-                //           width: 1,
-                //           color: Colors.grey.shade400,
-                //         ),
-                //         left: BorderSide(
-                //           width: 1,
-                //           color: Colors.grey.shade400,
-                //         ),
-                //         right: BorderSide(
-                //           width: 1,
-                //           color: Colors.grey.shade400,
-                //         ),
-                //         bottom: BorderSide(
-                //           width: 1,
-                //           color: Colors.grey.shade400,
-                //         ),
-                //       ),
-                //     ),
-                //     child: Padding(
-                //       padding: EdgeInsets.all(7),
-                //       child: Text(
-                //         '이미지 불러오기',
-                //         style: TextStyle(
-                //           color: Colors.black,
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ],
