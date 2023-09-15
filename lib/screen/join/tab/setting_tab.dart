@@ -4,6 +4,7 @@ import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
   return LockImageNotifier();
@@ -12,25 +13,64 @@ final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
 class SettingTab extends ConsumerStatefulWidget {
   const SettingTab({super.key});
 
-  // Future selectLockImage() async {
-  //   FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
-  //
-  //   if(result != null) {
-  //     final bytes = result.files.first.bytes;
-  //     final blob = html.Blob([bytes]);
-  //     final url = html.Url.createObjectUrlFromBlob(blob);
-  //
-  //   }
-  // }
-
   @override
   ConsumerState<SettingTab> createState() => _SettingTabState();
 }
 
 class _SettingTabState extends ConsumerState<SettingTab> {
-@override
-  Widget build(BuildContext context) {
 
+  saveBinary(String binary) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.setString('lock_binary', binary);
+  }
+
+  saveUrl(String url) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.setString('lock_url', url);
+  }
+
+  Future<LockImage> loadUrl() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String url = pref.getString('lock_url') ?? '';
+    String binary = pref.getString('lock_binary') ?? '';
+    return LockImage(url: url, binary: binary);
+  }
+
+  selectLockImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      final bytes = result.files.single.bytes;
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      String binary = String.fromCharCodes(bytes!);
+      ref.read(lockImageProvider.notifier).updateInfo(url, binary);
+      ref.read(lockImageProvider.notifier).updateIsChange(true);
+      saveUrl(url);
+      saveBinary(binary);
+    }
+  }
+
+
+  @override
+  void initState() {
+    //ref.read(lockImageProvider.notifier).updateIsChange(false);
+
+    Future<LockImage> info = loadUrl();
+    info.then((value) {
+      setState(() {
+        ref.read(lockImageProvider.notifier).updateInfo(value.url, value.binary);
+      });
+      //print('info : ${value.url} , ${value.binary}');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final LockImage lockImage = ref.watch(lockImageProvider);
 
     return Container(
       height: double.infinity,
@@ -73,26 +113,19 @@ class _SettingTabState extends ConsumerState<SettingTab> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(7),
-                    child: Text(ref.read(lockImageProvider.notifier).getUrl(), style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                    ),),
+                    child: Text(
+                      lockImage.url,
+                      style: TextStyle(
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(
                   width: 10,
                 ),
                 TextButton(
-                  onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
-
-                    if(result != null) {
-                      final bytes = result.files.first.bytes;
-                      final blob = html.Blob([bytes]);
-                      final url = html.Url.createObjectUrlFromBlob(blob);
-
-                      ref.read(lockImageProvider.notifier).updateUrl(url);
-                    }
-                  },
+                  onPressed: selectLockImage,
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
 import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
@@ -8,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
   return LockImageNotifier();
@@ -29,11 +33,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   List<MessageWidget> messageList = [];
 
-  int selectTapIndex = 0;
+  final TAB_LOCK = -1;
+
+  late int selectTapIndex;
+
+  Future<LockImage> loadInfo() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String url = pref.getString('lock_url') ?? '';
+    String binary = pref.getString('lock_binary') ?? '';
+    return LockImage(url: url, binary: binary);
+  }
 
   @override
   void initState() {
     super.initState();
+    selectTapIndex = TAB_LOCK;
+
+    Future<LockImage> info = loadInfo();
+    info.then((value) => ref.read(lockImageProvider.notifier).updateInfo(value.url, value.binary));
+
     _messageController = TextEditingController();
     _scrollController = ScrollController();
     _focusNode = FocusNode();
@@ -54,6 +72,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
@@ -337,22 +356,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ],
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: CustomPaint(
-                painter: GridBackgroundPainter(),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: messageList.length,
-                    itemBuilder: (context, index) => messageList[index],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          selectTapIndex == TAB_LOCK ? showLockImage(lockImage) : showRoom(),
           Container(
             height: 30,
             decoration: BoxDecoration(
@@ -384,14 +388,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   SizedBox(
                     width: 20,
                   ),
-                  ChatSheet(name: "Sheet1", onPressed: (){},),
+                  ChatSheet(
+                    name: "Sheet1",
+                    onPressed: () {
+                      setState(() {
+                        selectTapIndex = TAB_LOCK;
+                      });
+                    },
+                  ),
                   Expanded(
                     child: Container(
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: 1,
-                        itemBuilder: (context, i) {
-                          return ChatSheet(name: "채팅1", onPressed: (){},);
+                        itemBuilder: (context, index) {
+                          return ChatSheet(
+                            name: "채팅1",
+                            onPressed: () {
+                              setState(() {
+                                selectTapIndex = index;
+                              });
+                            },
+                          );
                         },
                       ),
                     ),
@@ -468,4 +486,45 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       });
     }
   }
+
+  showLockImage(LockImage lockImage) {
+    final List<int> codeUnits = lockImage.binary.codeUnits;
+    final Uint8List unit8List = Uint8List.fromList(codeUnits);
+
+    return Expanded(
+      // child: Image.network(lockImage.url),
+      child: Image.memory(unit8List, fit: BoxFit.fitHeight,),
+    );
+  }
+
+  showRoom() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 5),
+        child: CustomPaint(
+          painter: GridBackgroundPainter(),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: messageList.length,
+              itemBuilder: (context, index) => messageList[index],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Image imageFromBase64String(String base64String) {
+  //   return Image.memory(base64Decode(base64String));
+  // }
+  //
+  // Uint8List dataFromBase64String(String base64String) {
+  //   return base64Decode(base64String);
+  // }
+  //
+  // String base64String(Uint8List data) {
+  //   return base64Encode(data);
+  // }
 }

@@ -15,6 +15,7 @@ class _JoinTabState extends State<JoinTab> {
   void joinRoom(String nick, String code) {
     print('닉네임 : $nick, 방코드 : $code');
     //todo : 방 코드에 해당하는 방이 있는지 체크
+
   }
 
   @override

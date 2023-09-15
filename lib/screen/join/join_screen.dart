@@ -1,17 +1,23 @@
+import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:excel_chat/screen/join/tab/create_tab.dart';
 import 'package:excel_chat/screen/join/tab/help_tab.dart';
 import 'package:excel_chat/screen/join/tab/join_tab.dart';
 import 'package:excel_chat/screen/join/tab/setting_tab.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class JoinScreen extends StatefulWidget {
+final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
+  return LockImageNotifier();
+});
+
+class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({Key? key}) : super(key: key);
 
   @override
   _JoinScreenState createState() => _JoinScreenState();
 }
 
-class _JoinScreenState extends State<JoinScreen> {
+class _JoinScreenState extends ConsumerState<JoinScreen> {
 
   final TAP_JOIN = 0;
   final TAP_CREATE = 1;
@@ -33,6 +39,8 @@ class _JoinScreenState extends State<JoinScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final LockImage lockImage = ref.watch(lockImageProvider);
+
     return Scaffold(
       body: Row(
         children: [
@@ -58,8 +66,8 @@ class _JoinScreenState extends State<JoinScreen> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              Navigator.pop(context);
-                            },
+                              lockImage.isChange ? Navigator.popAndPushNamed(context, '/') :  Navigator.pop(context);
+                              },
                             child: const Padding(
                               padding: EdgeInsets.all(10.0),
                               child: Icon(

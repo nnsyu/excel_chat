@@ -1,3 +1,4 @@
+import 'package:excel_chat/providers/model/chat_info.dart';
 import 'package:excel_chat/service/firebase_manager.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,13 +20,15 @@ class _CreateTabState extends State<CreateTab> {
     //todo : 방을 새로 만든다.
     DatabaseReference ref = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
 
-    await ref.push().set({
-    // "name": "John",
-    // "age": 18,
-    // "address": {
-    //   "line1": "100 Mountain View"
-    // }
-    });
+    // int number = Random()
+    // var chatInfo = ChatInfo(roomName: name, roomCode: roomCode, users: users, messages: messages)
+    // await ref.push().set({
+    // // "name": "John",
+    // // "age": 18,
+    // // "address": {
+    // //   "line1": "100 Mountain View"
+    // // }
+    // });
   }
 
   @override
