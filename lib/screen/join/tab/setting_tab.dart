@@ -1,14 +1,15 @@
 import 'dart:html' as html;
 
+import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
-  return LockImageNotifier();
-});
+// final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
+//   return LockImageNotifier();
+// });
 
 class SettingTab extends ConsumerStatefulWidget {
   const SettingTab({super.key});
@@ -49,6 +50,7 @@ class _SettingTabState extends ConsumerState<SettingTab> {
       String binary = String.fromCharCodes(bytes!);
       ref.read(lockImageProvider.notifier).updateInfo(url, binary);
       ref.read(lockImageProvider.notifier).updateIsChange(true);
+      print('에우지1 ${ref.read(lockImageProvider.notifier).getIsChange()}');
       saveUrl(url);
       saveBinary(binary);
     }

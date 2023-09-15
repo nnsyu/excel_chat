@@ -8,6 +8,10 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'define/routes.dart';
 import 'firebase_options.dart';
 
+final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
+  return LockImageNotifier();
+});
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

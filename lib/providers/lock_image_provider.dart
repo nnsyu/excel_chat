@@ -30,11 +30,12 @@ class LockImageNotifier extends Notifier<LockImage> {
   }
 
   void updateInfo(String url, String binary) {
-    state = LockImage(url: url, binary: binary);
+    state = state.copyWith(url: url, binary: binary);
+    //state = LockImage(url: url, binary: binary);
   }
 
   void updateIsChange(bool isChange) {
-    state = LockImage(isChange: isChange);
+    state = state.copyWith(isChange: isChange);
   }
 
   String getUrl() {

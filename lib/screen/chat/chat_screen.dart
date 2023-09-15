@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
 import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
@@ -13,9 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
-  return LockImageNotifier();
-});
+// final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
+//   return LockImageNotifier();
+// });
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -136,6 +137,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             children: [
               GestureDetector(
                 onTap: () {
+                  ref.read(lockImageProvider.notifier).updateIsChange(false);
                   Navigator.pushNamed(context, '/join');
                 },
                 child: Container(

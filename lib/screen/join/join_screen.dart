@@ -1,3 +1,4 @@
+import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:excel_chat/screen/join/tab/create_tab.dart';
 import 'package:excel_chat/screen/join/tab/help_tab.dart';
@@ -6,9 +7,9 @@ import 'package:excel_chat/screen/join/tab/setting_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
-  return LockImageNotifier();
-});
+// final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
+//   return LockImageNotifier();
+// });
 
 class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({Key? key}) : super(key: key);
