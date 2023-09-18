@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -10,6 +11,7 @@ import 'package:excel_chat/screen/chat/components/message_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,6 +39,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TAB_LOCK = -1;
 
   late int selectTapIndex;
+  late int beforeIndex;
 
   Future<LockImage> loadInfo() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -399,21 +402,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     },
                   ),
                   Expanded(
-                    child: Container(
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 1,
-                        itemBuilder: (context, index) {
-                          return ChatSheet(
-                            name: "채팅1",
-                            onPressed: () {
-                              setState(() {
-                                selectTapIndex = index;
-                              });
+                    child: FutureBuilder(
+                      future: null,
+                      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: 1,
+                            itemBuilder: (context, index) {
+                              return ChatSheet(
+                                name: "채팅1",
+                                onPressed: () {
+                                  setState(() {
+                                    selectTapIndex = index;
+                                    beforeIndex = selectTapIndex;
+                                  });
+                                },
+                              );
                             },
                           );
-                        },
-                      ),
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -450,8 +463,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void scrollToBottom() {
     _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 500),
+      _scrollController.position.maxScrollExtent + 50,
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
     );
   }
@@ -495,22 +508,64 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Expanded(
       // child: Image.network(lockImage.url),
-      child: Image.memory(unit8List, fit: BoxFit.fitHeight,),
+      child: RawKeyboardListener(
+        focusNode: FocusNode(),
+        autofocus: true,
+        onKey: (RawKeyEvent event) {
+          if (event is RawKeyUpEvent &&
+              event.data is RawKeyEventDataWeb) {
+            final data = event.data as RawKeyEventDataWeb;
+            if (data.code == 'Escape') {
+              //print('ESC 클릭');
+              setState(() {
+                selectTapIndex = beforeIndex;
+                //showLockImage(lockImage);
+              });
+            }
+          }
+        },
+        child: Image.memory(
+          unit8List,
+          fit: BoxFit.fitHeight,
+        ),
+      ),
     );
   }
 
   showRoom() {
+    Timer(Duration(seconds: 1), () { scrollToBottom(); });
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(top: 5),
         child: CustomPaint(
           painter: GridBackgroundPainter(),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: messageList.length,
-              itemBuilder: (context, index) => messageList[index],
+          child: RawKeyboardListener(
+            focusNode: FocusNode(),
+            autofocus: true,
+            onKey: (RawKeyEvent event) {
+              if (event is RawKeyUpEvent &&
+                  event.data is RawKeyEventDataWeb) {
+                final data = event.data as RawKeyEventDataWeb;
+                if (data.code == 'Escape') {
+                  //print('ESC 클릭');
+                  setState(() {
+                    selectTapIndex = TAB_LOCK;
+                    //showLockImage(lockImage);
+                  });
+                }
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: ScrollConfiguration(
+                behavior: ScrollBehavior().copyWith(scrollbars: false),
+                child: ListView.builder(
+                  controller: _scrollController,
+                  itemCount: messageList.length,
+                  itemBuilder: (context, index) => messageList[index],
+                ),
+              ),
             ),
           ),
         ),
