@@ -52,6 +52,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     super.initState();
     selectTapIndex = TAB_LOCK;
+    beforeIndex = TAB_LOCK;
 
     Future<LockImage> info = loadInfo();
     info.then((value) => ref.read(lockImageProvider.notifier).updateInfo(value.url, value.binary));
@@ -524,10 +525,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             }
           }
         },
-        child: Image.memory(
-          unit8List,
-          fit: BoxFit.fitHeight,
-        ),
+        child: lockImage.binary == ''
+            ? Image.asset(
+                'assets/images/screenshot.png',
+                fit: BoxFit.fitHeight,
+              )
+            : Image.memory(
+                unit8List,
+                fit: BoxFit.fitHeight,
+              ),
       ),
     );
   }

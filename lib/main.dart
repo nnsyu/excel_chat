@@ -1,4 +1,5 @@
 import 'package:excel_chat/providers/lock_image_provider.dart';
+import 'package:excel_chat/providers/my_info.dart';
 import 'package:excel_chat/screen/chat/chat_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,10 @@ import 'firebase_options.dart';
 
 final lockImageProvider = NotifierProvider<LockImageNotifier, LockImage>(() {
   return LockImageNotifier();
+});
+
+final myInfoProvider = NotifierProvider<MyInfoNotifier, MyInfo>((){
+  return MyInfoNotifier();
 });
 
 void main() async{
