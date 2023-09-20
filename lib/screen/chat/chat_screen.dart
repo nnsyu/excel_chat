@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/lock_image_provider.dart';
+import 'package:excel_chat/providers/model/chat_info.dart';
 import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
 import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
 import 'package:excel_chat/screen/chat/components/grid_painter.dart';
@@ -73,6 +74,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final LockImage lockImage = ref.watch(lockImageProvider);
+    //final ChatInfo chatInfo = ref.watch(chatInfoProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,

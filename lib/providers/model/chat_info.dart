@@ -9,22 +9,18 @@ part 'chat_info.g.dart';
 class ChatInfo with _$ChatInfo {
   factory ChatInfo({
     required String roomName,
-    required String roomCode,
     required List<String> users,
+    @JsonKey(fromJson: _userInfoFromJson, toJson: _userInfoToJson)
     required List<UserInfo> messages,
 }) = _ChatInfo;
 
   factory ChatInfo.fromJson(Map<String, dynamic> json) => _$ChatInfoFromJson(json);
-
-  ChatInfo._();
-
-  // ChatInfo copyWith({String? roomName, String? roomCode, List<String>? users, List<UserInfo>? messages}) {
-  //   return ChatInfo(
-  //     roomName: roomName ?? this.roomName,
-  //     roomCode: roomCode ?? this.roomCode,
-  //     users: users ?? this.users,
-  //     messages: messages ?? this.messages,
-  //   );
-  // }
 }
+
+List<UserInfo> _userInfoFromJson(List<dynamic> json) =>
+json.map((item) => UserInfo.fromJson(item as Map<String, dynamic>)).toList();
+
+List<dynamic> _userInfoToJson(List<UserInfo> messages) =>
+messages.map((item) => item.toJson()).toList();
+
 

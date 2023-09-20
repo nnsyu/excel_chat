@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:excel_chat/providers/model/chat_info.dart';
+import 'package:excel_chat/providers/model/user_info.dart';
 import 'package:excel_chat/service/firebase_manager.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,20 +18,34 @@ class _CreateTabState extends State<CreateTab> {
   late TextEditingController _inputNickController;
   late TextEditingController _inputNameController;
 
+  String generateRandomString() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    Random rnd = Random();
+    return String.fromCharCodes(Iterable.generate(
+        6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+  }
+
   void createRoom(String nick, String name) async {
     print('닉네임 : $nick, 방이름 : $name');
     //todo : 방을 새로 만든다.
     DatabaseReference ref = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
 
-    // int number = Random()
-    // var chatInfo = ChatInfo(roomName: name, roomCode: roomCode, users: users, messages: messages)
-    // await ref.push().set({
-    // // "name": "John",
-    // // "age": 18,
-    // // "address": {
-    // //   "line1": "100 Mountain View"
-    // // }
-    // });
+    final date = DateTime.now();
+    final formatDate = '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0',)}';
+    final userInfo = UserInfo(
+      nick: nick,
+      date: formatDate,
+      msg: '$nick님이 참여하였습니다.',
+    );
+
+    var chatInfo = ChatInfo(
+      roomName: name,
+      users: [nick],
+      messages: [userInfo],
+    );
+
+    await ref.child(generateRandomString()).update(chatInfo.toJson());
+    // Navigator.pop(context);
   }
 
   @override
