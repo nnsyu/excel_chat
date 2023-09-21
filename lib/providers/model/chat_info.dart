@@ -8,6 +8,7 @@ part 'chat_info.g.dart';
 @freezed
 class ChatInfo with _$ChatInfo {
   factory ChatInfo({
+    required String roomCode,
     required String roomName,
     required List<String> users,
     @JsonKey(fromJson: _userInfoFromJson, toJson: _userInfoToJson)

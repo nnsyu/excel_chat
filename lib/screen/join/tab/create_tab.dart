@@ -1,20 +1,22 @@
 import 'dart:math';
 
+import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/model/chat_info.dart';
 import 'package:excel_chat/providers/model/user_info.dart';
 import 'package:excel_chat/service/firebase_manager.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CreateTab extends StatefulWidget {
+class CreateTab extends ConsumerStatefulWidget {
   const CreateTab({super.key});
 
   @override
-  State<CreateTab> createState() => _CreateTabState();
+  ConsumerState<CreateTab> createState() => _CreateTabState();
 }
 
-class _CreateTabState extends State<CreateTab> {
+class _CreateTabState extends ConsumerState<CreateTab> {
   late TextEditingController _inputNickController;
   late TextEditingController _inputNameController;
 
@@ -25,28 +27,31 @@ class _CreateTabState extends State<CreateTab> {
         6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
   }
 
-  void createRoom(String nick, String name) async {
-    print('닉네임 : $nick, 방이름 : $name');
-    //todo : 방을 새로 만든다.
-    DatabaseReference ref = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
-
-    final date = DateTime.now();
-    final formatDate = '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0',)}';
-    final userInfo = UserInfo(
-      nick: nick,
-      date: formatDate,
-      msg: '$nick님이 참여하였습니다.',
-    );
-
-    var chatInfo = ChatInfo(
-      roomName: name,
-      users: [nick],
-      messages: [userInfo],
-    );
-
-    await ref.child(generateRandomString()).update(chatInfo.toJson());
-    // Navigator.pop(context);
-  }
+  // void createRoom(String nick, String name) async {
+  //   print('닉네임 : $nick, 방이름 : $name');
+  //   //todo : 방을 새로 만든다.
+  //   DatabaseReference ref = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
+  //
+  //   final date = DateTime.now();
+  //   final formatDate = '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0',)}';
+  //   final userInfo = UserInfo(
+  //     nick: nick,
+  //     date: formatDate,
+  //     msg: '$nick님이 참여하였습니다.',
+  //   );
+  //
+  //   final roomCode = generateRandomString();
+  //
+  //   var chatInfo = ChatInfo(
+  //     roomCode: roomCode,
+  //     roomName: name,
+  //     users: [nick],
+  //     messages: [userInfo],
+  //   );
+  //
+  //   await ref.child(roomCode).update(chatInfo.toJson());
+  //   // Navigator.pop(context);
+  // }
 
   @override
   void initState() {
@@ -162,10 +167,12 @@ class _CreateTabState extends State<CreateTab> {
           height: 30,
         ),
         GestureDetector(
-          onTap: () => createRoom(
-            _inputNickController.text,
-            _inputNameController.text,
-          ),
+          onTap: () {
+            ref.read(chatInfoProvider.notifier).createRoom(
+              _inputNickController.text,
+              _inputNameController.text,
+            );
+          },
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(

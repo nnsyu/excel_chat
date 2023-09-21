@@ -5,10 +5,13 @@ import 'dart:typed_data';
 import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:excel_chat/providers/model/chat_info.dart';
+import 'package:excel_chat/providers/model/user_info.dart';
 import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
 import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
 import 'package:excel_chat/screen/chat/components/grid_painter.dart';
 import 'package:excel_chat/screen/chat/components/message_widget.dart';
+import 'package:excel_chat/service/firebase_manager.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -73,8 +76,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final LockImage lockImage = ref.watch(lockImageProvider);
-    //final ChatInfo chatInfo = ref.watch(chatInfoProvider);
+    final lockImage = ref.watch(lockImageProvider);
+    final chatInfo = ref.watch(chatInfoProvider);
+    final myInfo = ref.watch(myInfoProvider);
+
+    //print(ref.read(chatInfoProvider.notifier).future.then((value) => print('roomName : ${value.roomName}, roomCode : ${value.roomCode}, messages : ${value.messages.toString()}')));
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -115,13 +121,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   height: 22,
                 ),
                 Expanded(
-                  child: Text(
-                    '$title.xlsx - Excel',
-                    style: TextStyle(
-                        color: Colors.black.withOpacity(0.8),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w200),
-                    textAlign: TextAlign.center,
+                  child: GestureDetector(
+                    onTap: (){
+                      Clipboard.setData(ClipboardData(text: ref.read(myInfoProvider.notifier).getCode()));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('방 코드가 복사되었습니다!')),
+                      );
+                    },
+                    child: Text(
+                      '${ref.read(myInfoProvider.notifier).getCode()}.xlsx - Excel',
+                      style: TextStyle(
+                          color: Colors.black.withOpacity(0.8),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w200),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
                 Icon(
@@ -335,7 +349,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       border: Border.all(width: 1, color: Colors.grey.shade400),
                     ),
                     child: TextField(
-                      onSubmitted: submitMessage,
+                      onSubmitted: (msg) {
+                        if(msg.isNotEmpty) {
+                          ref.read(chatInfoProvider.notifier).sendMessage(msg);
+                          _messageController.clear();
+                          FocusScope.of(context).requestFocus(_focusNode);
+                          scrollToBottom();
+                        }
+                      },
                       focusNode: _focusNode,
                       controller: _messageController,
                       textAlign: TextAlign.start,
@@ -344,7 +365,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         border: InputBorder.none,
                         hintText: '내용을 입력하세요',
                         suffix: GestureDetector(
-                          onTap: sendMessage,
+                          onTap: () {
+                            ref.read(chatInfoProvider.notifier).sendMessage(_messageController.text);
+                            _messageController.clear();
+                            FocusScope.of(context).requestFocus(_focusNode);
+                            scrollToBottom();
+                          },
                           child: Icon(
                             Icons.arrow_forward,
                             color: Colors.grey.shade400,
@@ -404,34 +430,67 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       });
                     },
                   ),
-                  Expanded(
-                    child: FutureBuilder(
-                      future: null,
-                      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          return ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: 1,
-                            itemBuilder: (context, index) {
-                              return ChatSheet(
-                                name: "채팅1",
-                                onPressed: () {
-                                  setState(() {
-                                    selectTapIndex = index;
-                                    beforeIndex = selectTapIndex;
-                                  });
-                                },
-                              );
-                            },
-                          );
-                        }
-                      },
-                    ),
-                  ),
+                  switch (chatInfo) {
+                    AsyncData(:final value) => Expanded(
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 1,
+                          itemBuilder: (context, index) {
+                            return ChatSheet(
+                              name: value.roomName,
+                              onPressed: () {
+                                setState(() {
+                                  selectTapIndex = index;
+                                  beforeIndex = selectTapIndex;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    AsyncError(:final error) => ChatSheet(
+                        name: '불러오기 실패',
+                        onPressed: () {},
+                      ),
+                    _ => Center(
+                        child: ChatSheet(
+                          name: '불러오는중..',
+                          onPressed: () {},
+                        ),
+                      ),
+                  },
+
+                  // Expanded(
+                  //   child: FutureBuilder(
+                  //     future: null,
+                  //     builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                  //       if (snapshot.connectionState == ConnectionState.waiting) {
+                  //         return const CircularProgressIndicator();
+                  //       } else if (snapshot.hasError) {
+                  //         return Text('Error: ${snapshot.error}');
+                  //       } else {
+                  //         return ListView.builder(
+                  //           scrollDirection: Axis.horizontal,
+                  //           itemCount: 1,
+                  //           itemBuilder: (context, index) {
+                  //             return ChatSheet(
+                  //               name: "채팅1",
+                  //               onPressed: () {
+                  //                 setState(() {
+                  //                   selectTapIndex = index;
+                  //                   beforeIndex = selectTapIndex;
+                  //                 });
+                  //               },
+                  //             );
+                  //           },
+                  //         );
+                  //       }
+                  //     },
+                  //   ),
+                  // ),
+
+
+
                 ],
               ),
             ),
@@ -478,13 +537,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       var formatter = DateFormat('MM-dd HH:mm', 'ko_KR');
       String strDate = formatter.format(currentTime);
 
-      var message = MessageWidget(nick: '에우', date: strDate, message: text, mine: true,);
-      setState(() {
-        messageList.add(message);
-        _messageController.clear();
-        FocusScope.of(context).requestFocus(_focusNode);
-        scrollToBottom();
+      final nick = ref.read(myInfoProvider.notifier).getNick();
+
+      var message = MessageWidget(nick: nick, date: strDate, message: text, mine: true,);
+
+      ref.read(chatInfoProvider.notifier).future.then((value) {
+        print(value.toString());
       });
+
+      // DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
+      // ref.read(chatInfoProvider.notifier).future.then((value) {
+      //   value.messages.add(UserInfo(nick: '에우', date: strDate, msg: text));
+      //
+      //   chatRef.child(value.roomCode).child('messages').update(value.toJson());
+      //
+      //   _messageController.clear();
+      //   FocusScope.of(context).requestFocus(_focusNode);
+      //   scrollToBottom();
+      // });
+      //
+      // setState(() {
+      //   messageList.add(message);
+      //   _messageController.clear();
+      //   FocusScope.of(context).requestFocus(_focusNode);
+      //   scrollToBottom();
+      // });
     }
   }
 
@@ -552,8 +629,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             focusNode: FocusNode(),
             autofocus: true,
             onKey: (RawKeyEvent event) {
-              if (event is RawKeyUpEvent &&
-                  event.data is RawKeyEventDataWeb) {
+              if (event is RawKeyUpEvent && event.data is RawKeyEventDataWeb) {
                 final data = event.data as RawKeyEventDataWeb;
                 if (data.code == 'Escape') {
                   //print('ESC 클릭');
@@ -568,28 +644,76 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: ScrollConfiguration(
                 behavior: ScrollBehavior().copyWith(scrollbars: false),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: messageList.length,
-                  itemBuilder: (context, index) => messageList[index],
-                ),
+                child: switch(ref.read(chatInfoProvider)) {
+                  AsyncData(:final value) => ListView.builder(
+                      controller: _scrollController,
+                      itemCount: value.messages.length,
+                    itemBuilder: (context, index) => MessageWidget(
+                        nick: value.messages[index].nick,
+                        date: value.messages[index].date,
+                        message: value.messages[index].msg,
+                        mine: value.messages[index].nick == ref.read(myInfoProvider.notifier).getNick(),
+                      ),
+                    ),
+                  AsyncError(:final error) => ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messageList.length,
+                    itemBuilder: (context, index) => messageList[index],
+                  ),
+                  _ => ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messageList.length,
+                    itemBuilder: (context, index) => messageList[index],
+                  ),
+                },
+
+                // child: ListView.builder(
+                //   controller: _scrollController,
+                //   itemCount: messageList.length,
+                //   itemBuilder: (context, index) => messageList[index],
+                // ),
               ),
             ),
           ),
         ),
       ),
     );
-  }
 
-  // Image imageFromBase64String(String base64String) {
-  //   return Image.memory(base64Decode(base64String));
-  // }
-  //
-  // Uint8List dataFromBase64String(String base64String) {
-  //   return base64Decode(base64String);
-  // }
-  //
-  // String base64String(Uint8List data) {
-  //   return base64Encode(data);
-  // }
+    // return Expanded(
+    //   child: Padding(
+    //     padding: const EdgeInsets.only(top: 5),
+    //     child: CustomPaint(
+    //       painter: GridBackgroundPainter(),
+    //       child: RawKeyboardListener(
+    //         focusNode: FocusNode(),
+    //         autofocus: true,
+    //         onKey: (RawKeyEvent event) {
+    //           if (event is RawKeyUpEvent &&
+    //               event.data is RawKeyEventDataWeb) {
+    //             final data = event.data as RawKeyEventDataWeb;
+    //             if (data.code == 'Escape') {
+    //               //print('ESC 클릭');
+    //               setState(() {
+    //                 selectTapIndex = TAB_LOCK;
+    //                 //showLockImage(lockImage);
+    //               });
+    //             }
+    //           }
+    //         },
+    //         child: Container(
+    //           padding: EdgeInsets.symmetric(horizontal: 10),
+    //           child: ScrollConfiguration(
+    //             behavior: ScrollBehavior().copyWith(scrollbars: false),
+    //             child: ListView.builder(
+    //               controller: _scrollController,
+    //               itemCount: messageList.length,
+    //               itemBuilder: (context, index) => messageList[index],
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    // );
+  }
 }
