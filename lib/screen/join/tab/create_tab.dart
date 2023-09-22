@@ -69,6 +69,8 @@ class _CreateTabState extends ConsumerState<CreateTab> {
 
   @override
   Widget build(BuildContext context) {
+    final myInfo = ref.watch(myInfoProvider);
+
     return Container(
         child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,6 +174,8 @@ class _CreateTabState extends ConsumerState<CreateTab> {
               _inputNickController.text,
               _inputNameController.text,
             );
+
+            Navigator.popAndPushNamed(context, '/');
           },
           child: Container(
             decoration: BoxDecoration(

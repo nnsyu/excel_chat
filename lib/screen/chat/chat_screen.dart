@@ -6,6 +6,7 @@ import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/lock_image_provider.dart';
 import 'package:excel_chat/providers/model/chat_info.dart';
 import 'package:excel_chat/providers/model/user_info.dart';
+import 'package:excel_chat/screen/chat/chat_tab.dart';
 import 'package:excel_chat/screen/chat/components/chat_sheet.dart';
 import 'package:excel_chat/screen/chat/components/grid_background_painter.dart';
 import 'package:excel_chat/screen/chat/components/grid_painter.dart';
@@ -33,17 +34,17 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   late TextEditingController _messageController;
-  late ScrollController _scrollController;
+  //late ScrollController _scrollController;
   late FocusNode _focusNode;
 
-  String title = '엑셀제목제목';
+  //String title = '엑셀제목제목';
 
-  List<MessageWidget> messageList = [];
+  //List<MessageWidget> messageList = [];
 
-  final TAB_LOCK = -1;
+  //final TAB_LOCK = -1;
 
-  late int selectTapIndex;
-  late int beforeIndex;
+  //late int selectTabIndex;
+  //late int beforeIndex;
 
   Future<LockImage> loadInfo() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -55,29 +56,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    selectTapIndex = TAB_LOCK;
-    beforeIndex = TAB_LOCK;
+    //selectTabIndex = TAB_LOCK;
+    //beforeIndex = TAB_LOCK;
 
     Future<LockImage> info = loadInfo();
     info.then((value) => ref.read(lockImageProvider.notifier).updateInfo(value.url, value.binary));
 
     _messageController = TextEditingController();
-    _scrollController = ScrollController();
+    //_scrollController = ScrollController();
     _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _messageController.dispose();
-    _scrollController.dispose();
+    //_scrollController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    print('build !!!!!!!!!!!!!!!!!');
+
     final lockImage = ref.watch(lockImageProvider);
-    final chatInfo = ref.watch(chatInfoProvider);
+    //final chatInfo = ref.watch(chatInfoProvider);
     final myInfo = ref.watch(myInfoProvider);
 
     //print(ref.read(chatInfoProvider.notifier).future.then((value) => print('roomName : ${value.roomName}, roomCode : ${value.roomCode}, messages : ${value.messages.toString()}')));
@@ -354,7 +357,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           ref.read(chatInfoProvider.notifier).sendMessage(msg);
                           _messageController.clear();
                           FocusScope.of(context).requestFocus(_focusNode);
-                          scrollToBottom();
+                          //scrollToBottom();
                         }
                       },
                       focusNode: _focusNode,
@@ -369,7 +372,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             ref.read(chatInfoProvider.notifier).sendMessage(_messageController.text);
                             _messageController.clear();
                             FocusScope.of(context).requestFocus(_focusNode);
-                            scrollToBottom();
+                            //scrollToBottom();
                           },
                           child: Icon(
                             Icons.arrow_forward,
@@ -390,7 +393,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ],
             ),
           ),
-          selectTapIndex == TAB_LOCK ? showLockImage(lockImage) : showRoom(),
+          lockImage.tabIndex == -1 ? showLockImage(lockImage) : const ChatTab(),
           Container(
             height: 30,
             decoration: BoxDecoration(
@@ -425,72 +428,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ChatSheet(
                     name: "Sheet1",
                     onPressed: () {
-                      setState(() {
-                        selectTapIndex = TAB_LOCK;
-                      });
+                      ref.read(lockImageProvider.notifier).updateTabIndex(-1);
                     },
                   ),
-                  switch (chatInfo) {
-                    AsyncData(:final value) => Expanded(
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 1,
-                          itemBuilder: (context, index) {
-                            return ChatSheet(
-                              name: value.roomName,
-                              onPressed: () {
-                                setState(() {
-                                  selectTapIndex = index;
-                                  beforeIndex = selectTapIndex;
-                                });
-                              },
-                            );
+                  Expanded(
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: myInfo.nameMap == null ? 0 : myInfo.nameMap!.length,
+                      itemBuilder: (context, index) {
+                        return ChatSheet(
+                          name: myInfo.nameMap!.values.elementAt(index),
+                          onPressed: () {
+                            ref.read(lockImageProvider.notifier).updateTabIndex(index);
+                            ref.read(lockImageProvider.notifier).updateBeforeTabIndex(index);
                           },
-                        ),
-                      ),
-                    AsyncError(:final error) => ChatSheet(
-                        name: '불러오기 실패',
-                        onPressed: () {},
-                      ),
-                    _ => Center(
-                        child: ChatSheet(
-                          name: '불러오는중..',
-                          onPressed: () {},
-                        ),
-                      ),
-                  },
-
-                  // Expanded(
-                  //   child: FutureBuilder(
-                  //     future: null,
-                  //     builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                  //       if (snapshot.connectionState == ConnectionState.waiting) {
-                  //         return const CircularProgressIndicator();
-                  //       } else if (snapshot.hasError) {
-                  //         return Text('Error: ${snapshot.error}');
-                  //       } else {
-                  //         return ListView.builder(
-                  //           scrollDirection: Axis.horizontal,
-                  //           itemCount: 1,
-                  //           itemBuilder: (context, index) {
-                  //             return ChatSheet(
-                  //               name: "채팅1",
-                  //               onPressed: () {
-                  //                 setState(() {
-                  //                   selectTapIndex = index;
-                  //                   beforeIndex = selectTapIndex;
-                  //                 });
-                  //               },
-                  //             );
-                  //           },
-                  //         );
-                  //       }
-                  //     },
-                  //   ),
-                  // ),
-
-
-
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -523,64 +478,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  void scrollToBottom() {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent + 50,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void submitMessage(String text) {
-    if(text.isNotEmpty) {
-      DateTime currentTime = DateTime.now()..toLocal();
-      var formatter = DateFormat('MM-dd HH:mm', 'ko_KR');
-      String strDate = formatter.format(currentTime);
-
-      final nick = ref.read(myInfoProvider.notifier).getNick();
-
-      var message = MessageWidget(nick: nick, date: strDate, message: text, mine: true,);
-
-      ref.read(chatInfoProvider.notifier).future.then((value) {
-        print(value.toString());
-      });
-
-      // DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
-      // ref.read(chatInfoProvider.notifier).future.then((value) {
-      //   value.messages.add(UserInfo(nick: '에우', date: strDate, msg: text));
-      //
-      //   chatRef.child(value.roomCode).child('messages').update(value.toJson());
-      //
-      //   _messageController.clear();
-      //   FocusScope.of(context).requestFocus(_focusNode);
-      //   scrollToBottom();
-      // });
-      //
-      // setState(() {
-      //   messageList.add(message);
-      //   _messageController.clear();
-      //   FocusScope.of(context).requestFocus(_focusNode);
-      //   scrollToBottom();
-      // });
-    }
-  }
-
-  void sendMessage() {
-    var strMessage = _messageController.text;
-    if(strMessage.isNotEmpty) {
-      DateTime currentTime = DateTime.now();
-      var formatter = DateFormat('MM-dd HH:mm', 'ko_KR');
-      String strDate = formatter.format(currentTime);
-
-      var message = MessageWidget(nick: '에우', date: strDate, message: _messageController.text, mine: true,);
-      setState(() {
-        messageList.add(message);
-        _messageController.clear();
-        FocusScope.of(context).requestFocus(_focusNode);
-        scrollToBottom();
-      });
-    }
-  }
+  // void scrollToBottom() {
+  //   _scrollController.animateTo(
+  //     _scrollController.position.maxScrollExtent + 50,
+  //     duration: const Duration(milliseconds: 200),
+  //     curve: Curves.easeInOut,
+  //   );
+  // }
 
   showLockImage(LockImage lockImage) {
     final List<int> codeUnits = lockImage.binary.codeUnits;
@@ -596,11 +500,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               event.data is RawKeyEventDataWeb) {
             final data = event.data as RawKeyEventDataWeb;
             if (data.code == 'Escape') {
-              //print('ESC 클릭');
-              setState(() {
-                selectTapIndex = beforeIndex;
-                //showLockImage(lockImage);
-              });
+              ref.read(lockImageProvider.notifier).updateTabIndex(ref.read(lockImageProvider.notifier).getBeforeTabIndex());
+              // setState(() {
+              //   selectTabIndex = beforeIndex;
+              // });
             }
           }
         },
@@ -617,103 +520,56 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  showRoom() {
-    Timer(Duration(seconds: 1), () { scrollToBottom(); });
-
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 5),
-        child: CustomPaint(
-          painter: GridBackgroundPainter(),
-          child: RawKeyboardListener(
-            focusNode: FocusNode(),
-            autofocus: true,
-            onKey: (RawKeyEvent event) {
-              if (event is RawKeyUpEvent && event.data is RawKeyEventDataWeb) {
-                final data = event.data as RawKeyEventDataWeb;
-                if (data.code == 'Escape') {
-                  //print('ESC 클릭');
-                  setState(() {
-                    selectTapIndex = TAB_LOCK;
-                    //showLockImage(lockImage);
-                  });
-                }
-              }
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: ScrollConfiguration(
-                behavior: ScrollBehavior().copyWith(scrollbars: false),
-                child: switch(ref.read(chatInfoProvider)) {
-                  AsyncData(:final value) => ListView.builder(
-                      controller: _scrollController,
-                      itemCount: value.messages.length,
-                    itemBuilder: (context, index) => MessageWidget(
-                        nick: value.messages[index].nick,
-                        date: value.messages[index].date,
-                        message: value.messages[index].msg,
-                        mine: value.messages[index].nick == ref.read(myInfoProvider.notifier).getNick(),
-                      ),
-                    ),
-                  AsyncError(:final error) => ListView.builder(
-                    controller: _scrollController,
-                    itemCount: messageList.length,
-                    itemBuilder: (context, index) => messageList[index],
-                  ),
-                  _ => ListView.builder(
-                    controller: _scrollController,
-                    itemCount: messageList.length,
-                    itemBuilder: (context, index) => messageList[index],
-                  ),
-                },
-
-                // child: ListView.builder(
-                //   controller: _scrollController,
-                //   itemCount: messageList.length,
-                //   itemBuilder: (context, index) => messageList[index],
-                // ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // return Expanded(
-    //   child: Padding(
-    //     padding: const EdgeInsets.only(top: 5),
-    //     child: CustomPaint(
-    //       painter: GridBackgroundPainter(),
-    //       child: RawKeyboardListener(
-    //         focusNode: FocusNode(),
-    //         autofocus: true,
-    //         onKey: (RawKeyEvent event) {
-    //           if (event is RawKeyUpEvent &&
-    //               event.data is RawKeyEventDataWeb) {
-    //             final data = event.data as RawKeyEventDataWeb;
-    //             if (data.code == 'Escape') {
-    //               //print('ESC 클릭');
-    //               setState(() {
-    //                 selectTapIndex = TAB_LOCK;
-    //                 //showLockImage(lockImage);
-    //               });
-    //             }
-    //           }
-    //         },
-    //         child: Container(
-    //           padding: EdgeInsets.symmetric(horizontal: 10),
-    //           child: ScrollConfiguration(
-    //             behavior: ScrollBehavior().copyWith(scrollbars: false),
-    //             child: ListView.builder(
-    //               controller: _scrollController,
-    //               itemCount: messageList.length,
-    //               itemBuilder: (context, index) => messageList[index],
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    // );
-  }
+  // showRoom(AsyncValue<ChatInfo> info) {
+  //   return Expanded(
+  //     child: Padding(
+  //       padding: const EdgeInsets.only(top: 5),
+  //       child: CustomPaint(
+  //         painter: GridBackgroundPainter(),
+  //         child: RawKeyboardListener(
+  //           focusNode: FocusNode(),
+  //           autofocus: true,
+  //           onKey: (RawKeyEvent event) {
+  //             if (event is RawKeyUpEvent && event.data is RawKeyEventDataWeb) {
+  //               final data = event.data as RawKeyEventDataWeb;
+  //               if (data.code == 'Escape') {
+  //                 setState(() {
+  //                   selectTabIndex = TAB_LOCK;
+  //                 });
+  //               }
+  //             }
+  //           },
+  //           child: Container(
+  //             padding: EdgeInsets.symmetric(horizontal: 10),
+  //             child: ScrollConfiguration(
+  //               behavior: ScrollBehavior().copyWith(scrollbars: false),
+  //               child: switch(info) {
+  //                 AsyncData(:final value) => ListView.builder(
+  //                     controller: _scrollController,
+  //                     itemCount: value.messages.length,
+  //                   itemBuilder: (context, index) => MessageWidget(
+  //                       nick: value.messages[index].nick,
+  //                       date: value.messages[index].date,
+  //                       message: value.messages[index].msg,
+  //                       mine: value.messages[index].nick == ref.read(myInfoProvider.notifier).getNick(),
+  //                     ),
+  //                   ),
+  //                 AsyncError(:final error) => ListView.builder(
+  //                   controller: _scrollController,
+  //                   itemCount: messageList.length,
+  //                   itemBuilder: (context, index) => messageList[index],
+  //                 ),
+  //                 _ => ListView.builder(
+  //                   controller: _scrollController,
+  //                   itemCount: messageList.length,
+  //                   itemBuilder: (context, index) => messageList[index],
+  //                 ),
+  //               },
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }

@@ -19,6 +19,7 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
     final snapshot = await chatRef.child(ref.read(myInfoProvider).code).get();
     if (snapshot.exists) {
       final json = snapshot.value as Map<String, dynamic>;
+      print(json);
       return ChatInfo.fromJson(json);
     } else {
       print('No data available.');
@@ -64,6 +65,9 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
 
       ref.read(myInfoProvider.notifier).updateNick(nick);
       ref.read(myInfoProvider.notifier).updateCode(roomCode);
+      ref.read(myInfoProvider.notifier).updateCodeList(roomCode, name);
+
+      listenRoom(roomCode);
 
       return _fetchChatInfo(roomCode);
     });
@@ -81,7 +85,6 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
         final snapShot = await messageRef.get();
 
         if(snapShot.exists) {
-            print('아니아니');
             final value = snapShot.value as List<dynamic>;
             List<UserInfo> userInfoList = value.map((v) => UserInfo.fromJson(v as Map<String, dynamic>)).toList();
             userInfoList.add(UserInfo(nick: ref.read(myInfoProvider.notifier).getNick(), date: strDate, msg: msg));
@@ -96,6 +99,19 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
         }
 
       return _fetchChatInfo(roomCode);
+    });
+  }
+
+  Future<void> listenRoom(String code) async {
+
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      DatabaseReference messageRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef).child(code).child('messages');
+      messageRef.onValue.listen((event) {
+        print('바꼈다');
+        build();
+      });
+      return _fetchChatInfo(code);
     });
   }
 
