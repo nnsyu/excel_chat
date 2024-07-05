@@ -159,7 +159,7 @@ class _CreateTabState extends ConsumerState<CreateTab> {
           height: 5,
         ),
         Text(
-          "방 | 코드를 | 입력 후 | 아래 | \n참여하기 | 이미지를 | 누르면 | 입장합니다.",
+          "닉네임과 | 방 이름을 | 입력 후 | 아래 | \n방 만들기 | 버튼을 | 누르면 | 방을 | 생성합니다.",
           style: TextStyle(
             fontSize: 11,
             color: Colors.grey[500],
@@ -174,7 +174,6 @@ class _CreateTabState extends ConsumerState<CreateTab> {
               _inputNickController.text,
               _inputNameController.text,
             );
-
             Navigator.popAndPushNamed(context, '/');
           },
           child: Container(

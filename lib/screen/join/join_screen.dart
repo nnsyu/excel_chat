@@ -19,7 +19,6 @@ class JoinScreen extends ConsumerStatefulWidget {
 }
 
 class _JoinScreenState extends ConsumerState<JoinScreen> {
-
   final TAP_JOIN = 0;
   final TAP_CREATE = 1;
   final TAP_HELP = 2;
@@ -67,8 +66,10 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              lockImage.isChange ? Navigator.popAndPushNamed(context, '/') :  Navigator.pop(context);
-                              },
+                              lockImage.isChange
+                                  ? Navigator.popAndPushNamed(context, '/')
+                                  : Navigator.pop(context);
+                            },
                             child: const Padding(
                               padding: EdgeInsets.all(10.0),
                               child: Icon(
@@ -198,11 +199,11 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   }
 
   Widget selectTap() {
-    if(_selectTap == TAP_JOIN) {
+    if (_selectTap == TAP_JOIN) {
       return JoinTab();
     } else if (_selectTap == TAP_CREATE) {
       return CreateTab();
-    } else if (_selectTap == TAP_SETTING){
+    } else if (_selectTap == TAP_SETTING) {
       return SettingTab();
     } else {
       return HelpTab();

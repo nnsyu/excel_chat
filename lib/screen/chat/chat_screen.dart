@@ -492,30 +492,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Expanded(
       // child: Image.network(lockImage.url),
-      child: RawKeyboardListener(
+      child: KeyboardListener(
         focusNode: FocusNode(),
         autofocus: true,
-        onKey: (RawKeyEvent event) {
-          if (event is RawKeyUpEvent &&
-              event.data is RawKeyEventDataWeb) {
-            final data = event.data as RawKeyEventDataWeb;
-            if (data.code == 'Escape') {
+        onKeyEvent: (event) {
+          if (event is KeyUpEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.escape) {
               ref.read(lockImageProvider.notifier).updateTabIndex(ref.read(lockImageProvider.notifier).getBeforeTabIndex());
-              // setState(() {
-              //   selectTabIndex = beforeIndex;
-              // });
             }
           }
         },
         child: lockImage.binary == ''
             ? Image.asset(
-                'assets/images/screenshot.png',
-                fit: BoxFit.fitHeight,
-              )
+          'assets/images/screenshot.png',
+          fit: BoxFit.fitHeight,
+        )
             : Image.memory(
-                unit8List,
-                fit: BoxFit.fitHeight,
-              ),
+          unit8List,
+          fit: BoxFit.fitHeight,
+        ),
       ),
     );
   }

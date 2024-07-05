@@ -67,7 +67,7 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
       ref.read(myInfoProvider.notifier).updateCode(roomCode);
       ref.read(myInfoProvider.notifier).updateCodeList(roomCode, name);
 
-      listenRoom(roomCode);
+      //listenRoom(roomCode);
 
       return _fetchChatInfo(roomCode);
     });
@@ -102,17 +102,73 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
     });
   }
 
-  Future<void> listenRoom(String code) async {
+  // Future<void> listenRoom(String code) async {
+  //
+  //   state = const AsyncValue.loading();
+  //   state = await AsyncValue.guard(() async {
+  //     DatabaseReference messageRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef).child(code).child('messages');
+  //     messageRef.onValue.listen((event) {
+  //       print('바꼈다');
+  //       build();
+  //     });
+  //     return _fetchChatInfo(code);
+  //   });
+  // }
 
+  Future<ChatInfo?> isExistRoom(String nick, String code) async {
+    DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
+
+    final event = await chatRef.once(DatabaseEventType.value);
+    print('event $event');
+
+    final data = event.snapshot.value as Map<String, dynamic>;
+    print('data $data');
+
+    for(var key in data.keys) {
+      if(key == code) {
+        return ChatInfo.fromJson(data[key]);
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> joinRoom(String nick, ChatInfo chat) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      DatabaseReference messageRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef).child(code).child('messages');
-      messageRef.onValue.listen((event) {
-        print('바꼈다');
-        build();
-      });
-      return _fetchChatInfo(code);
+      final date = DateTime.now();
+      final month = date.month.toString().padLeft(2, '0');
+      final day = date.day.toString().padLeft(2, '0');
+      final hour = date.hour.toString().padLeft(2, '0');
+      final minute = date.minute.toString().padLeft(2, '0',);
+      final formatDate = '$month-$day $hour:$minute';
+
+      final userInfo = UserInfo(
+        nick: nick,
+        date: formatDate,
+        msg: '$nick님이 참여하였습니다.',
+      );
+
+      var chatInfo = ChatInfo(
+        roomCode: chat.roomCode,
+        roomName: chat.roomName,
+        users: [nick],
+        messages: [userInfo],
+      );
+
+      DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
+      await chatRef.child(chat.roomCode).update(chatInfo.toJson());
+
+      ref.read(myInfoProvider.notifier).updateNick(nick);
+      ref.read(myInfoProvider.notifier).updateCode(chat.roomCode);
+      ref.read(myInfoProvider.notifier).updateCodeList(chat.roomCode, chat.roomName);
+
+      return _fetchChatInfo(chat.roomCode);
     });
+  }
+
+  DatabaseReference listenMessages(String code) {
+    return FirebaseDatabase.instance.ref(FirebaseManager.chatRef).child(code).child('messages');
   }
 
 

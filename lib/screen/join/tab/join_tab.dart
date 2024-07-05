@@ -1,21 +1,38 @@
+import 'package:excel_chat/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class JoinTab extends StatefulWidget {
+class JoinTab extends ConsumerStatefulWidget {
   const JoinTab({super.key});
 
   @override
-  State<JoinTab> createState() => _JoinTabState();
+  ConsumerState<JoinTab> createState() => _JoinTabState();
 }
 
-class _JoinTabState extends State<JoinTab> {
+class _JoinTabState extends ConsumerState<JoinTab> {
   late TextEditingController _inputNickController;
   late TextEditingController _inputCodeController;
 
-  void joinRoom(String nick, String code) {
+  void joinRoom(String nick, String code) async {
     print('닉네임 : $nick, 방코드 : $code');
     //todo : 방 코드에 해당하는 방이 있는지 체크
 
+    // ref.read(chatInfoProvider.notifier).createRoom(
+    //   _inputNickController.text,
+    //   _inputCodeController.text,
+    // );
+
+
+    final chatInfo = await ref.read(chatInfoProvider.notifier).isExistRoom(nick, code);
+    if(chatInfo != null) {
+      ref.read(chatInfoProvider.notifier).joinRoom(
+            _inputNickController.text,
+            chatInfo,
+          );
+
+      Navigator.popAndPushNamed(context, '/');
+    }
   }
 
   @override
