@@ -35,7 +35,7 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
   Future<void> createRoom(String nick, String name) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      print('닉네임 : $nick, 방이름 : $name');
+      print('createRoom [닉네임 : $nick, 방이름 : $name]');
       //todo : 방을 새로 만든다.
       DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
 
@@ -71,6 +71,74 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
 
       return _fetchChatInfo(roomCode);
     });
+  }
+
+  Future<void> addUser(String code, String nick) async {
+    print('addUser [닉네임 : $nick, 방코드 : $code]');
+
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      DatabaseReference usersRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef).child(code).child('users');
+      final snapShot = await usersRef.get();
+
+      try {
+        if(snapShot.exists) {
+          List<dynamic> value = snapShot.value as List<dynamic>;
+          List<String> users = value.cast<String>();
+          print('addUser users = $users');
+          users.add(nick);
+
+          Map<String, List<String>> updates = {};
+          updates['${FirebaseManager.chatRef}/$code/users'] = users;
+
+          print('addUser update : $updates');
+          await FirebaseDatabase.instance.ref().update(updates);
+        } else {
+          print('뭐지');
+        }
+      } catch (e) {
+        print(e);
+      }
+
+
+      return _fetchChatInfo(code);
+    });
+
+  }
+
+  Future<void> joinRoom(String code, String nick) async {
+    DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
+    print('joinRoom [닉네임 : $nick, 방코드 : $code]');
+    final snapShot = await chatRef.get();
+    bool exist = false;
+    String roomName = 'error';
+
+    try {
+      if(snapShot.exists) {
+        final map = snapShot.value as Map<dynamic, dynamic>;
+        map.forEach((key, value) {
+          if(key == code) {
+            exist = true;
+            roomName = value['roomName'];
+          }
+        });
+      }
+
+      if(exist) {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() async {
+          await addUser(code, nick);
+
+          ref.read(myInfoProvider.notifier).updateNick(nick);
+          ref.read(myInfoProvider.notifier).updateCode(code);
+          ref.read(myInfoProvider.notifier).updateCodeList(code, roomName);
+
+          return _fetchChatInfo(code);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> sendMessage(String msg) async {
