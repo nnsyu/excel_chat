@@ -27,9 +27,9 @@ class _JoinTabState extends ConsumerState<JoinTab> {
     final chatInfo = await ref.read(chatInfoProvider.notifier).isExistRoom(nick, code);
     if(chatInfo != null) {
       ref.read(chatInfoProvider.notifier).joinRoom(
-            _inputNickController.text,
-            chatInfo,
-          );
+          _inputNickController.text,
+          chatInfo,
+      );
 
       Navigator.popAndPushNamed(context, '/');
     }
@@ -55,7 +55,7 @@ class _JoinTabState extends ConsumerState<JoinTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "방 참여하기",
             style: TextStyle(
               color: Colors.black,
@@ -63,7 +63,7 @@ class _JoinTabState extends ConsumerState<JoinTab> {
               fontWeight: FontWeight.w100,
             ),
           ),
-          const SizedBox(
+          SizedBox(
             height: 30,
           ),
           Container(
@@ -84,7 +84,7 @@ class _JoinTabState extends ConsumerState<JoinTab> {
                 controller: _inputNickController,
                 textAlign: TextAlign.start,
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(0),
+                  contentPadding: EdgeInsets.all(0),
                   border: InputBorder.none,
                   hintText: '닉네임을 입력하세요',
                   suffix: GestureDetector(
@@ -99,7 +99,7 @@ class _JoinTabState extends ConsumerState<JoinTab> {
               ),
             ),
           ),
-          const SizedBox(
+          SizedBox(
             height: 5,
           ),
           Container(
@@ -120,7 +120,7 @@ class _JoinTabState extends ConsumerState<JoinTab> {
                 controller: _inputCodeController,
                 textAlign: TextAlign.start,
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(0),
+                  contentPadding: EdgeInsets.all(0),
                   border: InputBorder.none,
                   hintText: '방 코드를 입력하세요',
                   suffix: GestureDetector(
@@ -135,7 +135,7 @@ class _JoinTabState extends ConsumerState<JoinTab> {
               ),
             ),
           ),
-          const SizedBox(
+          SizedBox(
             height: 5,
           ),
           Text(
@@ -145,18 +145,14 @@ class _JoinTabState extends ConsumerState<JoinTab> {
               color: Colors.grey[500],
             ),
           ),
-          const SizedBox(
+          SizedBox(
             height: 30,
           ),
           GestureDetector(
-            onTap: () {
-              ref.read(chatInfoProvider.notifier).joinRoom(
-                    _inputCodeController.text,
-                    _inputNickController.text,
-                  );
-
-              Navigator.popAndPushNamed(context, '/');
-            },
+            onTap: () => joinRoom(
+              _inputNickController.text,
+              _inputCodeController.text,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -164,7 +160,7 @@ class _JoinTabState extends ConsumerState<JoinTab> {
                   color: Colors.grey.shade400,
                 ),
               ),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(10),
                 child: Text(
                   '입장하기',
