@@ -11,8 +11,8 @@ class JoinTab extends ConsumerStatefulWidget {
 }
 
 class _JoinTabState extends ConsumerState<JoinTab> {
-  late TextEditingController _inputNickController;
-  late TextEditingController _inputCodeController;
+  final TextEditingController _inputNickController = TextEditingController();
+  final TextEditingController _inputCodeController = TextEditingController();
 
   void joinRoom(String nick, String code) async {
     print('닉네임 : $nick, 방코드 : $code');
@@ -25,6 +25,10 @@ class _JoinTabState extends ConsumerState<JoinTab> {
 
 
     final chatInfo = await ref.read(chatInfoProvider.notifier).isExistRoom(nick, code);
+    // final chatInfo = await ref.read(chatInfoProvider.notifier).fetchChatInfo(code);
+    //print('joinRoom $chatInfo');
+
+
     if(chatInfo != null) {
       ref.read(chatInfoProvider.notifier).joinRoom(
           _inputNickController.text,
@@ -38,8 +42,6 @@ class _JoinTabState extends ConsumerState<JoinTab> {
   @override
   void initState() {
     super.initState();
-    _inputNickController = TextEditingController();
-    _inputCodeController = TextEditingController();
   }
 
   @override

@@ -13,13 +13,14 @@ import 'package:intl/intl.dart';
 
 class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
 
-  Future<ChatInfo> _fetchChatInfo(String code) async {
+  Future<ChatInfo> fetchChatInfo(String code) async {
 
     final chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
-    final snapshot = await chatRef.child(ref.read(myInfoProvider).code).get();
+    //final snapshot = await chatRef.child(ref.read(myInfoProvider).code).get();
+    final snapshot = await chatRef.child(code).get();
     if (snapshot.exists) {
       final json = snapshot.value as Map<String, dynamic>;
-      print(json);
+      // print('_fetchChatInfo $json');
       return ChatInfo.fromJson(json);
     } else {
       print('No data available.');
@@ -29,7 +30,7 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
 
   @override
   Future<ChatInfo> build() async {
-    return _fetchChatInfo(ref.read(myInfoProvider).code);
+    return fetchChatInfo(ref.read(myInfoProvider).code);
   }
 
   Future<void> createRoom(String nick, String name) async {
@@ -69,7 +70,7 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
 
       //listenRoom(roomCode);
 
-      return _fetchChatInfo(roomCode);
+      return fetchChatInfo(roomCode);
     });
   }
 
@@ -95,10 +96,10 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
             updates['${FirebaseManager.chatRef}/$roomCode/messages'] = json;
             FirebaseDatabase.instance.ref().update(updates);
         } else {
-          print('뭐지');
+          print('sendMessage 뭐지');
         }
 
-      return _fetchChatInfo(roomCode);
+      return fetchChatInfo(roomCode);
     });
   }
 
@@ -119,10 +120,11 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
     DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
 
     final event = await chatRef.once(DatabaseEventType.value);
-    print('event $event');
+    // final snapshot = await chatRef.get();
+    print('isExistRoom event $event');
 
     final data = event.snapshot.value as Map<String, dynamic>;
-    print('data $data');
+    print('isExistRoom data $data');
 
     for(var key in data.keys) {
       if(key == code) {
@@ -134,36 +136,53 @@ class ChatInfoNotifier extends AsyncNotifier<ChatInfo> {
   }
 
   Future<void> joinRoom(String nick, ChatInfo chat) async {
+    print('joinRoom $chat');
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final date = DateTime.now();
-      final month = date.month.toString().padLeft(2, '0');
-      final day = date.day.toString().padLeft(2, '0');
-      final hour = date.hour.toString().padLeft(2, '0');
-      final minute = date.minute.toString().padLeft(2, '0',);
-      final formatDate = '$month-$day $hour:$minute';
+      try {
+        final date = DateTime.now();
+        final month = date.month.toString().padLeft(2, '0');
+        final day = date.day.toString().padLeft(2, '0');
+        final hour = date.hour.toString().padLeft(2, '0');
+        final minute = date.minute.toString().padLeft(2, '0',);
+        final formatDate = '$month-$day $hour:$minute';
 
-      final userInfo = UserInfo(
-        nick: nick,
-        date: formatDate,
-        msg: '$nick님이 참여하였습니다.',
-      );
+        final userInfo = UserInfo(
+          nick: nick,
+          date: formatDate,
+          msg: '$nick님이 참여하였습니다.',
+        );
 
-      var chatInfo = ChatInfo(
-        roomCode: chat.roomCode,
-        roomName: chat.roomName,
-        users: [nick],
-        messages: [userInfo],
-      );
+        // 수정 가능한 리스트로 복사 후 추가
+        final updatedUsers = List<String>.from(chat.users)..add(nick);
+        final updatedMessages = List<UserInfo>.from(chat.messages)..add(userInfo);
 
-      DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
-      await chatRef.child(chat.roomCode).update(chatInfo.toJson());
+        //print('joinRoom $userInfo');
 
-      ref.read(myInfoProvider.notifier).updateNick(nick);
-      ref.read(myInfoProvider.notifier).updateCode(chat.roomCode);
-      ref.read(myInfoProvider.notifier).updateCodeList(chat.roomCode, chat.roomName);
+        // copyWith 메서드를 사용하여 새로운 ChatInfo 객체 생성
+        final chatInfo = chat.copyWith(
+          users: updatedUsers,
+          messages: updatedMessages,
+        );
 
-      return _fetchChatInfo(chat.roomCode);
+        // chat.users.add(nick);
+        // chat.messages.add(userInfo);
+
+        //print('joinRoom $chat');
+
+        DatabaseReference chatRef = FirebaseDatabase.instance.ref(FirebaseManager.chatRef);
+        await chatRef.child(chatInfo.roomCode).update(chatInfo.toJson());
+
+        ref.read(myInfoProvider.notifier).updateNick(nick);
+        ref.read(myInfoProvider.notifier).updateCode(chatInfo.roomCode);
+        ref.read(myInfoProvider.notifier).updateCodeList(chatInfo.roomCode, chatInfo.roomName);
+
+        return fetchChatInfo(chatInfo.roomCode);
+      } catch (e, stacktrace) {
+        print('joinRoom 예외 발생: $e');
+        print('joinRoom 스택 트레이스: $stacktrace');
+        rethrow;
+      }
     });
   }
 

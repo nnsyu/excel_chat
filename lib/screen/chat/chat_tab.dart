@@ -4,6 +4,7 @@ import 'package:excel_chat/main.dart';
 import 'package:excel_chat/providers/model/chat_info.dart';
 import 'package:excel_chat/providers/model/user_info.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,12 +19,15 @@ class ChatTab extends ConsumerStatefulWidget {
 }
 
 class _ChatTabState extends ConsumerState<ChatTab> {
-  late ScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -34,8 +38,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
 
   @override
   Widget build(BuildContext context) {
-    Timer(const Duration(seconds: 2), () { scrollToBottom(); });
-    //final chatInfo = ref.watch(chatInfoProvider);
+    //final chatInfo = ref.read(chatInfoProvider);
 
     return Expanded(
       child: Padding(
@@ -58,14 +61,17 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                   stream: ref.read(chatInfoProvider.notifier).listenMessages(ref.read(myInfoProvider.notifier).getCode()).onValue,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     } else if (snapshot.hasData) {
                       final data = snapshot.data?.snapshot.value as List<dynamic>;
                       final dataMapList = List<Map<String, dynamic>>.from(data);
                       final msgList = dataMapList.map((map) => UserInfo.fromJson(map)).toList();
-                      print('뭐지뭐지뭐지 $msgList');
+
+                      SchedulerBinding.instance.addPostFrameCallback((_) {
+                        _scrollToBottom();
+                      });
 
                       return ListView.builder(
                         controller: _scrollController,
@@ -78,42 +84,11 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                               ref.read(myInfoProvider.notifier).getNick(),
                         ),
                       );
-
-                      return Center(
-                        child: Text('뭐지뭐지뭐지 $data'),
-                      );
-
                     } else {
                       return Center(child: Text('No data available'));
                     }
                   },
                 ),
-                // child: switch(chatInfo) {
-                //   AsyncData(:final value) => ListView.builder(
-                //     controller: _scrollController,
-                //     itemCount: value.messages.length,
-                //     itemBuilder: (context, index) => MessageWidget(
-                //       nick: value.messages[index].nick,
-                //       date: value.messages[index].date,
-                //       message: value.messages[index].msg,
-                //       mine: value.messages[index].nick == ref.read(myInfoProvider.notifier).getNick(),
-                //     ),
-                //   ),
-                //   AsyncError(:final error) => ListView.builder(
-                //     controller: _scrollController,
-                //     itemCount: 1,
-                //     itemBuilder: (context, index) {
-                //       MessageWidget(nick: 'error', date: 'error', message: 'error', mine: true);
-                //     },
-                //   ),
-                //   _ => ListView.builder(
-                //     controller: _scrollController,
-                //     itemCount: 1,
-                //     itemBuilder: (context, index) {
-                //       MessageWidget(nick: 'error', date: 'error', message: 'error', mine: true);
-                //     },
-                //   ),
-                // },
               ),
             ),
           ),
@@ -122,11 +97,19 @@ class _ChatTabState extends ConsumerState<ChatTab> {
     );
   }
 
-  void scrollToBottom() {
+  // void scrollToBottom() {
+  //   _scrollController.animateTo(
+  //     _scrollController.position.maxScrollExtent + 50,
+  //     duration: const Duration(milliseconds: 200),
+  //     curve: Curves.easeInOut,
+  //   );
+  // }
+
+  void _scrollToBottom() {
     _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent + 50,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
     );
   }
 }
